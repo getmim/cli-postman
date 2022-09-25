@@ -45,14 +45,14 @@ return [
                 'path' => [
                     'value' => 'postman',
                 ],
-                'handler' => 'CliPostman\\Controller\\Postman::compress'
+                'handler' => 'CliPostman\\Controller\\Postman::generate'
             ]
         ]
     ],
     
     'cli' => [
     	'autocomplete' => [
-    		'!^postman (all|gzip|webp|brotli)( .*)?$!' => [
+    		'!^postman' => [
     			'priority' => 7,
     			'handler' => [
                     'class' => 'CliPostman\\Library\\Autocomplete',
