@@ -3,7 +3,7 @@
 /**
  * Postman controller
  * @package cli-postman
- * @version 0.0.1
+ * @version 0.0.3
  */
 
 namespace CliPostman\Controller;
@@ -23,13 +23,20 @@ class PostmanController extends \CliApp\Controller
 	public function generateAction()
 	{
 		$currentPath = getcwd();
-		$routes = include $currentPath . '/etc/cache/routes.php';
-		$config = include $currentPath . '/etc/cache/config.php';
 
 		// make sure this is app base
 		if (!$this->isAppBase($currentPath)) {
 			Bash::error('Please run the command under exists application');
 		}
+
+		if(
+			!is_file($currentPath . '/etc/cache/routes.php')
+			|| !is_file($currentPath . '/etc/cache/config.php')
+		) {
+			Bash::error('No application cache found!');
+		}
+		$routes = include $currentPath . '/etc/cache/routes.php';
+		$config = include $currentPath . '/etc/cache/config.php';
 
 		$directories = new \DirectoryIterator($currentPath . '/modules');
 
@@ -50,8 +57,7 @@ class PostmanController extends \CliApp\Controller
 							$workingControllerFileContent = file_get_contents($workingControllerFile);
 
 							$workingControllerFileContent = preg_replace('#\ extends\ .*#i', '', $workingControllerFileContent);
-							file_put_contents($tmpFile, $workingControllerFileContent);
-
+							Fs::write( $tmpFile, $workingControllerFileContent );
 							include $tmpFile;
 							$className = $this->getDeclaredClass($tmpFile);
 
