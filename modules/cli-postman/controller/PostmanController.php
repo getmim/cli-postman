@@ -225,7 +225,6 @@ class PostmanController extends \CliApp\Controller
 			}
 		}
 		unset($apiDocCandidate);
-
 		
 
 
@@ -314,6 +313,59 @@ class PostmanController extends \CliApp\Controller
 					$this->recursiveAssignDocument($document, $collection['item']);
 				}
 			}
+			// if( end($document['api_folder']) === $collection['name'] ) {
+			// 	$collection['item'][] = [
+			// 		'name'     => $document['api_title'],
+			// 		"event" => [
+			// 			[
+			// 				"listen" => "test",
+			// 				"script" => [
+			// 					"exec" => [
+			// 						"const responseJson = pm.response.json();",
+			// 						"pm.expect(responseJson.error).to.eql(0);"
+			// 					],
+			// 					"type" => "text/javascript"
+			// 				]
+			// 			]
+			// 		],
+			// 		'request'  => [
+			// 			'auth'        => '',
+			// 			'method'      => strtoupper($document['method']),
+			// 			'header'      => [
+			// 				[
+			// 					'key'         => 'Accept',
+			// 					'value'       => 'application/json',
+			// 					'type'		  => 'text',
+			// 					'description' => null,
+			// 				],
+			// 				[
+			// 					'key'         => 'Content-Type',
+			// 					'value'       => 'application/json',
+			// 					'type'		  => 'text',
+			// 					'description' => null,
+			// 				],
+			// 				[
+			// 					'key'         => 'Authorization',
+			// 					'value'       => '{{ACCESS_TOKEN}}',
+			// 					'type'		  => 'text',
+			// 					'description' => null,
+			// 				],
+			// 			],
+			// 			'body'        => [
+			// 				'mode' => 'raw',
+			// 				'raw'  => $document['raw_body'],
+			// 			],
+			// 			'url'         => [
+			// 				'raw'   => '{{HOST}}' . $document['path'],
+			// 				'host'  => '{{HOST}}' . $document['path'],
+			// 				'variable' => null,
+			// 				'query' => $document['query'],
+			// 			],
+			// 			'description' => $document['description'] . "\n\n" . $document['description_table'],
+			// 		],
+			// 		'response' => [],
+			// 	];
+			// }
 			// if collection name and document api_folder match, write document
 			if (isset($collection['name']) && $collection['name'] === end($document['api_folder'])) {
 				$collection['item'][] = [
