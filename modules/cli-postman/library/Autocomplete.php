@@ -7,7 +7,6 @@
 
 namespace CliPostman\Library;
 
-use Mim\Library\Fs;
 
 class Autocomplete extends \Cli\Autocomplete
 {
@@ -17,7 +16,7 @@ class Autocomplete extends \Cli\Autocomplete
 
 	static function command(array $args): string{
 		$farg = $args[1] ?? null;
-		$result = ['postman'];
+		$result = ['init', 'run'];
 
 		if(!$farg)
 			return trim(implode(' ', $result));

@@ -2,7 +2,7 @@
 /**
  * CLI Postman
  * @package cli-postman
- * @version 0.2.1
+ * @version 0.2.2
  */
 
 return [

@@ -29,7 +29,7 @@ class PostmanController extends \CliApp\Controller
 			Bash::error('Please run the command under exists application');
 		}
 
-		if(
+		if (
 			!is_file($currentPath . '/etc/cache/routes.php')
 			|| !is_file($currentPath . '/etc/cache/config.php')
 		) {
@@ -57,7 +57,7 @@ class PostmanController extends \CliApp\Controller
 							$workingControllerFileContent = file_get_contents($workingControllerFile);
 
 							$workingControllerFileContent = preg_replace('#\ extends\ .*#i', '', $workingControllerFileContent);
-							Fs::write( $tmpFile, $workingControllerFileContent );
+							Fs::write($tmpFile, $workingControllerFileContent);
 							include $tmpFile;
 							$className = $this->getDeclaredClass($tmpFile);
 
@@ -143,7 +143,7 @@ class PostmanController extends \CliApp\Controller
 											}
 
 											$urlQuery = [];
-											if( count($sorts) > 0 ) {
+											if (count($sorts) > 0) {
 
 												$description .= "\n\nAllowed `sorts` field: `" . implode(',', $sorts) . "`";
 												$urlQuery[] = [
@@ -152,7 +152,7 @@ class PostmanController extends \CliApp\Controller
 													'disabled' => true,
 												];
 											}
-											if( count($filters) > 0 ) {
+											if (count($filters) > 0) {
 												$description .= "\n\nAllowed `filters` field: `" . implode(',', $filters) . "`";
 												$urlQuery[] = [
 													'key' => 'filters',
@@ -215,7 +215,7 @@ class PostmanController extends \CliApp\Controller
 					$paths = explode('/', $paths);
 					foreach ($paths as $key => &$path) {
 						if ($path === '{{}}') {
-							$path = '{{' . strtoupper(($paths[$key - 1] ?? '') . '_id') . '}}';
+							$path = '{{' . strtolower(($paths[$key - 1] ?? '') . '.id') . '}}';
 						}
 					}
 					$apiDocCandidate['path'] = implode('/', $paths);
@@ -225,7 +225,7 @@ class PostmanController extends \CliApp\Controller
 			}
 		}
 		unset($apiDocCandidate);
-		
+
 
 
 
@@ -274,24 +274,24 @@ class PostmanController extends \CliApp\Controller
 			$this->recursiveAssignDocument($match, $paths);
 		}
 
-		$name = preg_replace('/\s+/', '-',$config->name );
+		$name = preg_replace('/\s+/', '-', $config->name);
 		$postmanCollection = [
 			'variables' => [],
 			'info'      => [
-				'name'        => ucwords( str_replace('-', ' ', $name) ),
+				'name'        => ucwords(str_replace('-', ' ', $name)),
 				'_postman_id' => $this->uuidv4(),
 				'description' => '',
 				'schema'      => 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
 			],
 			'item' => $paths
 		];
-		
+
 		$fullpath = $currentPath . '/' . $name . '.json';
-		
 
 
-		Fs::write( $fullpath, json_encode($postmanCollection));
-		Bash::echo( 'Postmen document created : ' . $fullpath );
+
+		Fs::write($fullpath, json_encode($postmanCollection));
+		Bash::echo('Postmen document created : ' . $fullpath);
 	}
 
 	private function recursiveAssignDocument($document, &$collections)
@@ -368,20 +368,41 @@ class PostmanController extends \CliApp\Controller
 			// }
 			// if collection name and document api_folder match, write document
 			if (isset($collection['name']) && $collection['name'] === end($document['api_folder'])) {
-				$collection['item'][] = [
-					'name'     => $document['api_title'],
-					"event" => [
+
+				$variableKeyOnCreate = str_replace('/', '', preg_replace('/(\/{{).*?(\}}\/)/', '.', $document['path'])) . '.id';
+				$event = [
+					[
+						"listen" => "test",
+						"script" => [
+							"exec" => [
+								"const responseJson = pm.response.json();",
+								"pm.expect(responseJson.error).to.eql(0);"
+							],
+							"type" => "text/javascript"
+						]
+					]
+				];
+				if(strtolower($document['method']) === 'post') {
+					$event = [
 						[
 							"listen" => "test",
 							"script" => [
 								"exec" => [
 									"const responseJson = pm.response.json();",
-									"pm.expect(responseJson.error).to.eql(0);"
+									"if(responseJson.error){",
+									"return;",
+									"}",
+									"pm.environment.set($variableKeyOnCreate, res.data.id);"
 								],
 								"type" => "text/javascript"
 							]
 						]
-					],
+					];
+				}
+
+				$collection['item'][] = [
+					'name'     => $document['api_title'],
+					"event" => $event,
 					'request'  => [
 						'auth'        => '',
 						'method'      => strtoupper($document['method']),
