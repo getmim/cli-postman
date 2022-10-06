@@ -392,7 +392,7 @@ class PostmanController extends \CliApp\Controller
 									"if(responseJson.error){",
 									"return;",
 									"}",
-									"pm.environment.set($variableKeyOnCreate, res.data.id);"
+									"pm.environment.set($variableKeyOnCreate, responseJson.data.id);"
 								],
 								"type" => "text/javascript"
 							]

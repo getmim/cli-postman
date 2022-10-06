@@ -2,12 +2,12 @@
 /**
  * CLI Postman
  * @package cli-postman
- * @version 0.2.2
+ * @version 0.2.3
  */
 
 return [
     '__name' => 'cli-postman',
-    '__version' => '0.2.1',
+    '__version' => '0.2.3',
     '__git' => 'git@github.com:godamri/cli-postman.git',
     '__license' => 'MIT',
     '__author' => [
