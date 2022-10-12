@@ -3,17 +3,12 @@
 /**
  * Postman controller
  * @package cli-postman
- * @version 0.0.3
+ * @version 0.2.4
  */
 
 namespace CliPostman\Controller;
 
 use Cli\Library\Bash;
-use CliApp\Library\{
-	Apps,
-	Module,
-	Config
-};
 use Mim\Library\Fs;
 
 class PostmanController extends \CliApp\Controller
@@ -191,7 +186,7 @@ class PostmanController extends \CliApp\Controller
 				if ($apiRoute->handler === $apiDocCandidate['handler_id']) {
 					$apiDocCandidate['url'] = $apiRoute->path->value;
 					$apiDocCandidate['method'] = $apiRoute->method;
-					$rawBody = "";
+					$rawBody = [];
 					$descriptionTable = "";
 
 					if (isset($config->libForm->forms->{$apiDocCandidate['form']})) {
@@ -199,16 +194,11 @@ class PostmanController extends \CliApp\Controller
 						$descriptionTable .= "--- | --- | --- \n";
 
 						foreach ($config->libForm->forms->{$apiDocCandidate['form']} as $k => $param) {
-							$rawBody .= "\t\"" . $k . "\":\"\",";
+							$rawBody[$k] = '';
 							$descriptionTable .= "$k | none | $k \n";
 						}
-						$rawBody = rtrim($rawBody, ',');
-						$rawBody = implode(",\n", explode(',', $rawBody));
 					}
-					if ($apiDocCandidate['method'] === 'POST' || $apiDocCandidate['method'] === 'PUT') {
-						$rawBody = "{\n" . $rawBody . "\n}";
-					}
-					$apiDocCandidate['raw_body'] = $rawBody;
+					$apiDocCandidate['raw_body'] = json_encode($rawBody, JSON_PRETTY_PRINT);
 					$apiDocCandidate['description_table'] = $descriptionTable;
 
 					$paths = preg_replace('/(\(:).*?(\))/', '{{}}', $apiRoute->path->value);
@@ -225,30 +215,6 @@ class PostmanController extends \CliApp\Controller
 			}
 		}
 		unset($apiDocCandidate);
-
-
-
-
-		// $paths = [];
-		// foreach ($matches as $match) {
-		// 	$tmpArr = $match['api_folder'];
-		// 	$arr = [];
-		// 	$ref = &$arr;
-		// 	foreach ($tmpArr as $index => $key) {
-		// 		$ref[$key] = [];
-		// 		if (count($tmpArr) === ($index + 1)) {
-		// 			$ref = &$ref[$key];
-		// 		} else {
-		// 			$ref = &$ref[$key];
-		// 		}
-		// 		if (count($tmpArr) === $index + 1) {
-		// 			$this->walkAndAssign($arr, $match);
-		// 			$ref = &$ref[$key];
-		// 		}
-		// 	}
-		// 	$ref = [];
-		// 	$paths = array_merge_recursive($paths, $arr);
-		// }
 
 		$paths = [];
 		foreach ($matches as $match) {
@@ -288,8 +254,6 @@ class PostmanController extends \CliApp\Controller
 
 		$fullpath = $currentPath . '/' . $name . '.json';
 
-
-
 		Fs::write($fullpath, json_encode($postmanCollection));
 		Bash::echo('Postmen document created : ' . $fullpath);
 	}
@@ -313,59 +277,7 @@ class PostmanController extends \CliApp\Controller
 					$this->recursiveAssignDocument($document, $collection['item']);
 				}
 			}
-			// if( end($document['api_folder']) === $collection['name'] ) {
-			// 	$collection['item'][] = [
-			// 		'name'     => $document['api_title'],
-			// 		"event" => [
-			// 			[
-			// 				"listen" => "test",
-			// 				"script" => [
-			// 					"exec" => [
-			// 						"const responseJson = pm.response.json();",
-			// 						"pm.expect(responseJson.error).to.eql(0);"
-			// 					],
-			// 					"type" => "text/javascript"
-			// 				]
-			// 			]
-			// 		],
-			// 		'request'  => [
-			// 			'auth'        => '',
-			// 			'method'      => strtoupper($document['method']),
-			// 			'header'      => [
-			// 				[
-			// 					'key'         => 'Accept',
-			// 					'value'       => 'application/json',
-			// 					'type'		  => 'text',
-			// 					'description' => null,
-			// 				],
-			// 				[
-			// 					'key'         => 'Content-Type',
-			// 					'value'       => 'application/json',
-			// 					'type'		  => 'text',
-			// 					'description' => null,
-			// 				],
-			// 				[
-			// 					'key'         => 'Authorization',
-			// 					'value'       => '{{ACCESS_TOKEN}}',
-			// 					'type'		  => 'text',
-			// 					'description' => null,
-			// 				],
-			// 			],
-			// 			'body'        => [
-			// 				'mode' => 'raw',
-			// 				'raw'  => $document['raw_body'],
-			// 			],
-			// 			'url'         => [
-			// 				'raw'   => '{{HOST}}' . $document['path'],
-			// 				'host'  => '{{HOST}}' . $document['path'],
-			// 				'variable' => null,
-			// 				'query' => $document['query'],
-			// 			],
-			// 			'description' => $document['description'] . "\n\n" . $document['description_table'],
-			// 		],
-			// 		'response' => [],
-			// 	];
-			// }
+
 			// if collection name and document api_folder match, write document
 			if (isset($collection['name']) && $collection['name'] === end($document['api_folder'])) {
 
@@ -382,7 +294,7 @@ class PostmanController extends \CliApp\Controller
 						]
 					]
 				];
-				if(strtolower($document['method']) === 'post') {
+				if (strtolower($document['method']) === 'post') {
 					$event = [
 						[
 							"listen" => "test",
