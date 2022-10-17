@@ -9,11 +9,6 @@
 namespace CliPostman\Controller;
 
 use Cli\Library\Bash;
-use CliApp\Library\{
-	Apps,
-	Module,
-	Config
-};
 use Mim\Library\Fs;
 
 class PostmanController extends \CliApp\Controller

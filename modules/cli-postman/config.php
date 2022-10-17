@@ -31,10 +31,6 @@ return [
             'CliPostman\\Controller' => [
                 'type' => 'file',
                 'base' => 'modules/cli-postman/controller'
-            ],
-            'CliPostman\\Library' => [
-                'type' => 'file',
-                'base' => 'modules/cli-postman/library'
             ]
         ]
     ],
@@ -48,25 +44,5 @@ return [
                 'handler' => 'CliPostman\\Controller\\Postman::generate'
             ]
         ]
-    ],
-    
-    'cli' => [
-    	'autocomplete' => [
-    		'!^postman' => [
-    			'priority' => 7,
-    			'handler' => [
-                    'class' => 'CliPostman\\Library\\Autocomplete',
-                    'method' => 'files'
-                ]
-    		],
-
-    		'!^postman( [a-z]*)?$!' => [
-    			'priority' => 6,
-    			'handler' => [
-                    'class' => 'CliPostman\\Library\\Autocomplete',
-                    'method' => 'command'
-                ]
-    		]
-    	]
     ]
 ];
