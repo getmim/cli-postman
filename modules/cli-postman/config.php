@@ -1,13 +1,8 @@
 <?php
-/**
- * CLI Postman
- * @package cli-postman
- * @version 0.2.4
- */
 
 return [
     '__name' => 'cli-postman',
-    '__version' => '0.2.4',
+    '__version' => '0.3.0',
     '__git' => 'git@github.com:godamri/cli-postman.git',
     '__license' => 'MIT',
     '__author' => [
@@ -16,12 +11,12 @@ return [
         'website' => 'https://--.com/'
     ],
     '__files' => [
-        'modules/cli-postman' => ['install', 'update', 'remove']
+        'modules/cli-postman' => ['install','update','remove']
     ],
     '__dependencies' => [
         'required' => [
             [
-                'cli' => null
+                'cli' => NULL
             ]
         ],
         'optional' => []
@@ -43,30 +38,28 @@ return [
             'toolPostmanCollection' => [
                 'info' => 'Generate postman collection',
                 'path' => [
-                    'value' => 'postman',
+                    'value' => 'postman'
                 ],
                 'handler' => 'CliPostman\\Controller\\Postman::generate'
             ]
         ]
     ],
-    
     'cli' => [
-    	'autocomplete' => [
-    		'!^postman' => [
-    			'priority' => 7,
-    			'handler' => [
+        'autocomplete' => [
+            '!^postman' => [
+                'priority' => 7,
+                'handler' => [
                     'class' => 'CliPostman\\Library\\Autocomplete',
                     'method' => 'files'
                 ]
-    		],
-
-    		'!^postman( [a-z]*)?$!' => [
-    			'priority' => 6,
-    			'handler' => [
+            ],
+            '!^postman( [a-z]*)?$!' => [
+                'priority' => 6,
+                'handler' => [
                     'class' => 'CliPostman\\Library\\Autocomplete',
                     'method' => 'command'
                 ]
-    		]
-    	]
+            ]
+        ]
     ]
 ];

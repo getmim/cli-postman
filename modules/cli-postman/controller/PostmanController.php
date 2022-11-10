@@ -9,11 +9,13 @@
 namespace CliPostman\Controller;
 
 use Cli\Library\Bash;
+use CliPostman\Library\Generator;
 use Mim\Library\Fs;
 
 class PostmanController extends \CliApp\Controller
 {
 	private $postmanDir = [];
+	private $host = 'HOST';
 
 	public function generateAction()
 	{
@@ -32,6 +34,9 @@ class PostmanController extends \CliApp\Controller
 		}
 		$routes = include $currentPath . '/etc/cache/routes.php';
 		$config = include $currentPath . '/etc/cache/config.php';
+		if(isset($config->postman_host)) {
+			$this->host = $config->postman_host;
+		}
 
 		$directories = new \DirectoryIterator($currentPath . '/modules');
 
@@ -236,6 +241,7 @@ class PostmanController extends \CliApp\Controller
 		$this->recursiveSetArrayForm($paths);
 		$this->recursiveArrayValues($paths);
 		$paths = array_values($paths);
+
 		foreach ($matches as $key => $match) {
 			$this->recursiveAssignDocument($match, $paths);
 		}
@@ -254,8 +260,8 @@ class PostmanController extends \CliApp\Controller
 
 		$fullpath = $currentPath . '/' . $name . '.json';
 
-		Fs::write($fullpath, json_encode($postmanCollection));
-		Bash::echo('Postmen document created : ' . $fullpath);
+		Fs::write($fullpath, json_encode($postmanCollection, JSON_PRETTY_PRINT));
+		Bash::echo('Postman document created : ' . $fullpath);
 	}
 
 	private function recursiveAssignDocument($document, &$collections)
@@ -311,7 +317,6 @@ class PostmanController extends \CliApp\Controller
 						]
 					];
 				}
-
 				$collection['item'][] = [
 					'name'     => $document['api_title'],
 					"event" => $event,
@@ -343,8 +348,8 @@ class PostmanController extends \CliApp\Controller
 							'raw'  => $document['raw_body'],
 						],
 						'url'         => [
-							'raw'   => '{{HOST}}' . $document['path'],
-							'host'  => '{{HOST}}' . $document['path'],
+							'raw'   => "{{{$this->host}}}" . $document['path'],
+							'host'  => "{{{$this->host}}}" . $document['path'],
 							'variable' => null,
 							'query' => $document['query'],
 						],
@@ -381,7 +386,7 @@ class PostmanController extends \CliApp\Controller
 				// check if item's child
 				if (is_int($key)) {
 					$r['item'] = array_values($r['item']);
-					$this->recursiveArrayValues($r);
+					$this->recursiveArrayValues($r['item']);
 				}
 				// check if collection has item, then extract them
 				elseif (isset($r['item'])) {
