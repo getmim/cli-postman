@@ -2,7 +2,7 @@
 
 return [
     '__name' => 'cli-postman',
-    '__version' => '0.3.0',
+    '__version' => '0.3.1',
     '__git' => 'git@github.com:godamri/cli-postman.git',
     '__license' => 'MIT',
     '__author' => [

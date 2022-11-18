@@ -34,7 +34,7 @@ class PostmanController extends \CliApp\Controller
 		}
 		$routes = include $currentPath . '/etc/cache/routes.php';
 		$config = include $currentPath . '/etc/cache/config.php';
-		if(isset($config->postman_host)) {
+		if (isset($config->postman_host)) {
 			$this->host = $config->postman_host;
 		}
 
@@ -199,7 +199,16 @@ class PostmanController extends \CliApp\Controller
 						$descriptionTable .= "--- | --- | --- \n";
 
 						foreach ($config->libForm->forms->{$apiDocCandidate['form']} as $k => $param) {
-							$rawBody[$k] = '';
+							$val = ucfirst($k);
+							if (isset($param->type)) {
+								if ($param->type === 'number') {
+									$val = 100;
+								}
+								if ($param->type === 'double') {
+									$val = 12.3;
+								}
+							}
+							$rawBody[$k] = $val;
 							$descriptionTable .= "$k | none | $k \n";
 						}
 					}
@@ -208,9 +217,18 @@ class PostmanController extends \CliApp\Controller
 
 					$paths = preg_replace('/(\(:).*?(\))/', '{{}}', $apiRoute->path->value);
 					$paths = explode('/', $paths);
+					$pathClone = $paths;
 					foreach ($paths as $key => &$path) {
 						if ($path === '{{}}') {
-							$path = '{{' . strtolower(($paths[$key - 1] ?? '') . '.id') . '}}';
+							$prefix = '';
+							foreach ($pathClone as $k => $p) {
+								if ($p !== '{{}}' && $p !== '') {
+									if ($k < $key) {
+										$prefix .= $p . '.';
+									}
+								}
+							}
+							$path = '{{' . strtolower($prefix . 'id') . '}}';
 						}
 					}
 					$apiDocCandidate['path'] = implode('/', $paths);
@@ -288,18 +306,19 @@ class PostmanController extends \CliApp\Controller
 			if (isset($collection['name']) && $collection['name'] === end($document['api_folder'])) {
 
 				$variableKeyOnCreate = str_replace('/', '', preg_replace('/(\/{{).*?(\}}\/)/', '.', $document['path'])) . '.id';
-				$event = [
-					[
-						"listen" => "test",
-						"script" => [
-							"exec" => [
-								"const responseJson = pm.response.json();",
-								"pm.expect(responseJson.error).to.eql(0);"
-							],
-							"type" => "text/javascript"
-						]
-					]
-				];
+				// $event = [
+				// 	[
+				// 		"listen" => "test",
+				// 		"script" => [
+				// 			"exec" => [
+				// 				"const responseJson = pm.response.json();",
+				// 				"pm.expect(responseJson.error).to.eql(0);"
+				// 			],
+				// 			"type" => "text/javascript"
+				// 		]
+				// 	]
+				// ];
+				$event = [];
 				if (strtolower($document['method']) === 'post') {
 					$event = [
 						[
@@ -310,7 +329,7 @@ class PostmanController extends \CliApp\Controller
 									"if(responseJson.error){",
 									"return;",
 									"}",
-									"pm.environment.set($variableKeyOnCreate, responseJson.data.id);"
+									"pm.environment.set('$variableKeyOnCreate', responseJson.data.id);"
 								],
 								"type" => "text/javascript"
 							]
